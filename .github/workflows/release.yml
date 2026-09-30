@@ -11,7 +11,7 @@ on:
   push:
     branches: [main, master]
     tags: ["v*"]
-    paths-ignore: ["**.md", ".gitignore"]      # documentation-only changes don't need a build
+    paths-ignore: ["**.md", "docs/**", ".gitignore"]      # documentation-only changes don't need a build
   pull_request:
   workflow_dispatch:
 
