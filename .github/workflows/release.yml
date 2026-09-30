@@ -1,0 +1,64 @@
+# Builds the Windows app on GitHub's machines.
+# - Every push to the main branch (including the first upload of the repository)
+#   and every pull request: the zipped app is kept as a downloadable artifact of
+#   the run (Actions tab > the run > Artifacts).
+# - Push a version tag (git tag v1.0.0 && git push origin v1.0.0): the zipped app is
+#   also attached to a GitHub Release for that version.
+# - Or run it by hand (Actions tab > Build Windows app > Run workflow).
+name: Build Windows app
+
+on:
+  push:
+    branches: [main, master]
+    tags: ["v*"]
+    paths-ignore: ["**.md", ".gitignore"]      # documentation-only changes don't need a build
+  pull_request:
+  workflow_dispatch:
+
+# A newer push to the same branch cancels the build still running for the older one.
+concurrency:
+  group: build-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.14"
+          cache: pip
+
+      - name: Install dependencies
+        run: python -m pip install -r requirements.txt
+
+      - name: Test the audio pipeline
+        run: python -m pytest tests/test_pipeline.py -q -p no:cacheprovider
+
+      - name: Build and check Evenfold.exe
+        run: powershell -ExecutionPolicy Bypass -File tools\build_exe.ps1
+
+      - name: Zip the app
+        shell: pwsh
+        run: |
+          $sha = $env:GITHUB_SHA.Substring(0, 7)
+          $name = if ($env:GITHUB_REF_TYPE -eq "tag") { "Evenfold-$($env:GITHUB_REF_NAME)-windows" } else { "Evenfold-$sha-windows" }
+          Compress-Archive -Path dist\Evenfold -DestinationPath "$name.zip"
+          "ZIP_NAME=$name.zip" >> $env:GITHUB_ENV
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.ZIP_NAME }}
+          path: ${{ env.ZIP_NAME }}
+
+      - name: Publish the release
+        if: github.ref_type == 'tag'
+        uses: softprops/action-gh-release@v2
+        with:
+          files: ${{ env.ZIP_NAME }}
+          generate_release_notes: true

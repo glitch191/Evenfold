@@ -1,0 +1,4 @@
+# Normalize line endings in the repository; binaries stay untouched.
+* text=auto
+*.ico binary
+*.wav binary

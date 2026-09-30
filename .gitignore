@@ -1,0 +1,18 @@
+# Python
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# PyInstaller output (publish the .exe as a GitHub release, not in the repository)
+build/
+dist/
+*.lnk
+
+# Generated test album (python -m tests.make_test_album) and mastered outputs
+tests/album/
+mastered/
+
+# Reports exported while testing
+*.pdf
+*.csv
