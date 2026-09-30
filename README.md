@@ -143,3 +143,13 @@ The same input and settings always give byte-for-byte identical output.
 | `tests/` | audio and interface tests, test-album generator |
 
 </details>
+
+## License
+
+The Evenfold source code is released under the [MIT license](LICENSE).
+
+The Windows download also bundles open-source libraries under their own
+licenses, all listed in **Help › About**. Two of them, pedalboard (GPLv3) and
+mutagen (GPLv2+), are copyleft, so the compiled app as a whole is distributed
+under the terms of the GPLv3; its complete source code is this repository.
+Qt / PySide6 and fpdf2 are LGPLv3; the others are MIT or BSD.
