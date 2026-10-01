@@ -19,7 +19,7 @@ from PySide6.QtWidgets import QApplication, QProxyStyle, QStyle, QStyleFactory
 
 APP_NAME = "Evenfold"
 APP_TAGLINE = "Album Mastering"
-APP_VERSION = "1.0.0"
+APP_VERSION = "1.0.1"
 ORG_NAME = "Evenfold"
 
 PALETTE: dict[str, str] = {
