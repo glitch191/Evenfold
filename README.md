@@ -102,7 +102,9 @@ pedalboard, soundfile). Windows builds are made by GitHub Actions
 
 Each build runs the audio tests, then checks the compiled app end to end
 (analysis, mastering of a test album, reports; playback too, when the machine
-has a sound card).
+has a sound card). It installs the exact library versions listed in
+`requirements-lock.txt`, so a new release of a library can't change the app
+on its own; `requirements.txt` only sets minimum versions.
 
 To build the executable yourself, with Python 3.14 installed:
 
@@ -112,7 +114,12 @@ python -m venv .venv
 powershell -ExecutionPolicy Bypass -File tools\build_exe.ps1
 ```
 
-The result is `dist\Evenfold\Evenfold.exe`.
+The result is `dist\Evenfold\Evenfold.exe`. To build with the same library
+versions as the official releases, install `requirements-lock.txt` instead of
+`requirements.txt`.
+
+The screenshots in `docs/` are made by
+`.venv\Scripts\python -m tools.make_screenshots`.
 
 <details>
 <summary>How the mastering chain works</summary>
