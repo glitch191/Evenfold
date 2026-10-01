@@ -33,9 +33,11 @@ jobs:
         with:
           python-version: "3.14"
           cache: pip
+          cache-dependency-path: requirements-lock.txt
 
+      # Exact versions, so the exe only changes when the code (or the lock file) does.
       - name: Install dependencies
-        run: python -m pip install -r requirements.txt
+        run: python -m pip install -r requirements-lock.txt
 
       - name: Test the audio pipeline
         run: python -m pytest tests/test_pipeline.py -q -p no:cacheprovider
