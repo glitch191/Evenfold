@@ -15,10 +15,14 @@ from .theme import APP_NAME
 
 PRESET_FORMAT = 1
 
+# Every built-in sets spacing too, so loading one after "Continuous Mix" turns gaps back on.
+# Targets louder than about -10 LUFS need more limiting than sounds clean, hence no louder preset.
 BUILT_IN: dict[str, dict] = {
-    "Streaming Standard (-14 LUFS)": {"target_lufs": -14.0, "ceiling_dbtp": -1.0},
-    "Gentle & Dynamic (-16 LUFS)": {"target_lufs": -16.0, "ceiling_dbtp": -1.0},
-    "Loud (-10 LUFS)": {"target_lufs": -10.0, "ceiling_dbtp": -1.0},
+    "Streaming Standard (-14 LUFS)": {"target_lufs": -14.0, "ceiling_dbtp": -1.0, "even_spacing": True},
+    "Rock, Pop & Electronic (-11 LUFS)": {"target_lufs": -11.0, "ceiling_dbtp": -1.0, "even_spacing": True},
+    "Bandcamp & SoundCloud (-10 LUFS)": {"target_lufs": -10.0, "ceiling_dbtp": -1.0, "even_spacing": True},
+    "Apple Music & Dynamic (-16 LUFS)": {"target_lufs": -16.0, "ceiling_dbtp": -1.0, "even_spacing": True},
+    "Continuous Mix (-14 LUFS, no gaps)": {"target_lufs": -14.0, "ceiling_dbtp": -1.0, "even_spacing": False},
 }
 
 _UNSAFE = re.compile(r'[<>:"/\\|?*\x00-\x1f]')

@@ -234,10 +234,37 @@ TIPS: dict[str, tuple[str, str]] = {
 }
 
 
+# Built-in preset name (ui.presets.BUILT_IN) -> when to use it
+PRESET_TIPS: dict[str, str] = {
+    "Streaming Standard (-14 LUFS)":
+        "For Spotify, YouTube, Tidal and Amazon Music, which play every song at -14 LUFS. Louder "
+        "masters are simply turned down there, so this keeps the most punch at the same volume.",
+    "Rock, Pop & Electronic (-11 LUFS)":
+        "For dense, energetic music played outside streaming services (downloads, CDs, your own "
+        "player). Clearly louder than the streaming standard while the limiter stays gentle.",
+    "Bandcamp & SoundCloud (-10 LUFS)":
+        "For sites that don't even out volume between songs, so your music holds up next to loud "
+        "releases. About as loud as this app goes cleanly: very dynamic songs may stop a little short.",
+    "Apple Music & Dynamic (-16 LUFS)":
+        "Apple Music plays songs at -16 LUFS. Also a good fit for acoustic, jazz or classical "
+        "albums, where quiet and loud passages should stay far apart.",
+    "Continuous Mix (-14 LUFS, no gaps)":
+        "For DJ mixes, live sets and albums where songs flow into each other: volume is matched to "
+        "the streaming standard, and the silence between tracks is left exactly as it is.",
+}
+
+
 def tip(key: str) -> str:
     """Rich-text tooltip: bold title, then the explanation."""
     title, body = TIPS[key]
     return f"<b>{escape(title)}</b><br>{escape(body)}"
+
+
+def preset_tip(name: str) -> str:
+    """Tooltip of a built-in preset: when to use it, or the generic text."""
+    if name not in PRESET_TIPS:
+        return tip("builtin_preset")
+    return f"<b>{escape(name)}</b><br>{escape(PRESET_TIPS[name])}<br><i>{escape(TIPS['builtin_preset'][1])}</i>"
 
 
 def album_bar_tip(number: int, title: str, before: float, after: float | None) -> str:
