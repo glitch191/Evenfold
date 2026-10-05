@@ -224,3 +224,24 @@ def test_clear_forgets_previous_outcome(env):
     s.add_paths([str(root / "album")])
     _wait(app, lambda: not s.analyzing)
     assert window.simple.master.outcome_box.isHidden()
+
+
+def test_built_in_presets_are_complete_and_explained(env):
+    from audio.summary import LOUDER_PRESET_LUFS
+    from ui.presets import BUILT_IN
+    from ui.tooltips import PRESET_TIPS
+
+    _app, window, _root = env
+    assert set(PRESET_TIPS) == set(BUILT_IN)
+    assert all("even_spacing" in values for values in BUILT_IN.values())
+    assert any(values["target_lufs"] == LOUDER_PRESET_LUFS for values in BUILT_IN.values())
+    session = window.session
+    before = session.settings.copy()
+    try:
+        session.apply_preset(BUILT_IN["Continuous Mix (-14 LUFS, no gaps)"])
+        assert not session.settings.even_spacing
+        session.apply_preset(BUILT_IN["Rock, Pop & Electronic (-11 LUFS)"])
+        assert session.settings.even_spacing and session.settings.target_lufs == -11.0
+    finally:
+        session.apply_preset(before.preset_dict())
+        session.results_stale = False

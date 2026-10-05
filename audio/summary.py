@@ -16,6 +16,10 @@ from .analysis import ClippingReport, SourceFormat, SUBTYPES
 if TYPE_CHECKING:
     from .batch import TrackResult
 
+TURNED_DOWN_EACH_DB = 0.5      # every track lowered by more than this (smaller counts as "no change")
+TURNED_DOWN_AVERAGE_DB = 1.0   # ...and by at least this much on average -> explain why
+LOUDER_PRESET_LUFS = -11.0     # target of the "Rock, Pop & Electronic" built-in preset
+
 
 @dataclass
 class ResultDescription:
@@ -142,4 +146,19 @@ def batch_summary(results: list["TrackResult"], target_lufs: float, dry_run: boo
         text += f", all within {max(spread, 0.05):.1f} LU of the target" if spread < 1.0 else ""
     if failed:
         text += f" · {failed} could not be processed"
-    return text + "."
+    return text + "." + turned_down_hint(ok, target_lufs)
+
+
+def turned_down_hint(results: list["TrackResult"], target_lufs: float) -> str:
+    """Explain an album whose every track was turned down: the mixes were already louder than
+    the target, so "mastered" sounds quieter than the originals, which surprises people."""
+    gains = [r.gain_db for r in results if math.isfinite(r.input_lufs)]
+    if not gains or max(gains) >= -TURNED_DOWN_EACH_DB or sum(gains) / len(gains) > -TURNED_DOWN_AVERAGE_DB:
+        return ""
+    text = f" Your mixes were already louder than {target_lufs:g} LUFS, so every track was turned down."
+    if target_lufs < LOUDER_PRESET_LUFS - 0.5:
+        text += (
+            " That suits streaming services, which turn loud songs down anyway. For downloads, CDs or "
+            f"Bandcamp, load the {LOUDER_PRESET_LUFS:g} LUFS preset (Edit › Presets) to keep them loud."
+        )
+    return text

@@ -25,7 +25,7 @@ from audio.processing import TARGET_LUFS_RANGE
 
 from . import theme
 from .presets import BUILT_IN, PresetStore
-from .tooltips import BASICS, TIPS, tip
+from .tooltips import BASICS, TIPS, preset_tip, tip
 from .widgets import button, label
 
 LIBRARIES = (
@@ -154,7 +154,7 @@ class LoadPresetDialog(QDialog):
         for name in BUILT_IN:
             item = QListWidgetItem(theme.icon("ph.sparkle", "accent"), name)
             item.setData(Qt.ItemDataRole.UserRole, name)
-            item.setToolTip(tip("builtin_preset"))
+            item.setToolTip(preset_tip(name))
             self.list.addItem(item)
         for name in store.names():
             item = QListWidgetItem(theme.icon("ph.floppy-disk", "text_muted"), name)

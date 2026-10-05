@@ -231,3 +231,24 @@ def test_unsupported_files_are_explained(tmp_path):
     with pytest.raises(Exception) as info:
         read_source_format(bogus)
     assert "WAV" in str(info.value)
+
+
+def test_album_turned_down_is_explained():
+    from types import SimpleNamespace
+
+    from audio.summary import batch_summary, turned_down_hint
+
+    def results(*gains):
+        return [SimpleNamespace(gain_db=g, input_lufs=-14.0 - g, after=SimpleNamespace(lufs=-14.0), error="")
+                for g in gains]
+
+    # Mixes already louder than the target (one only a little): the summary says why it got quieter.
+    hint = turned_down_hint(results(-1.3, -2.5, -0.53, -2.7), -14.0)
+    assert "turned down" in hint and "-11 LUFS preset" in hint
+    # At a loud target, no suggestion of an even louder preset.
+    assert "preset" not in turned_down_hint(results(-1.5, -2.0), -10.0)
+    # A track that was raised, or barely changed, means it isn't the whole album.
+    assert turned_down_hint(results(-2.0, 1.0), -14.0) == ""
+    assert turned_down_hint(results(-2.0, -0.4), -14.0) == ""
+    assert turned_down_hint(results(-0.6, -0.7), -14.0) == ""    # less than 1 dB on average
+    assert batch_summary(results(-1.0, 3.0), -14.0, dry_run=True).endswith("target.")
