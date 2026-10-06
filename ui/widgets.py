@@ -10,10 +10,13 @@ from __future__ import annotations
 import math
 from pathlib import Path
 
-from PySide6.QtCore import QSize, Qt, Signal
+from PySide6.QtCore import QEvent, QObject, QSize, Qt, Signal
 from PySide6.QtGui import QAction, QKeySequence
 from PySide6.QtWidgets import (
     QAbstractItemView,
+    QAbstractSlider,
+    QAbstractSpinBox,
+    QApplication,
     QButtonGroup,
     QCheckBox,
     QComboBox,
@@ -32,6 +35,7 @@ from PySide6.QtWidgets import (
     QProgressBar,
     QPushButton,
     QRadioButton,
+    QScrollArea,
     QSizePolicy,
     QSlider,
     QTableWidget,
@@ -123,6 +127,30 @@ def button(text: str, variant: str | None = None, icon_name: str | None = None, 
         b.setToolTip(tip(tip_key))
     b.setCursor(Qt.CursorShape.PointingHandCursor)
     return b
+
+
+class _WheelScrollsColumn(QObject):
+    """Hands the mouse wheel over a value control to the column's scroll bar."""
+
+    def __init__(self, scroll: QScrollArea) -> None:
+        super().__init__(scroll)
+        self._bar = scroll.verticalScrollBar()
+
+    def eventFilter(self, watched: QObject, event: QEvent) -> bool:
+        if event.type() == QEvent.Type.Wheel:
+            QApplication.sendEvent(self._bar, event)
+            return True
+        return False
+
+
+def wheel_scrolls_past_controls(scroll: QScrollArea) -> None:
+    """Scrolling a side column must never change a setting it passes over: spin boxes,
+    sliders and drop-downs ignore the wheel there (clicks and the keyboard still work)."""
+    guard = _WheelScrollsColumn(scroll)
+    for control in scroll.widget().findChildren(QWidget):
+        if isinstance(control, (QAbstractSpinBox, QAbstractSlider, QComboBox)):
+            control.setFocusPolicy(Qt.FocusPolicy.StrongFocus)     # the wheel no longer gives them focus
+            control.installEventFilter(guard)
 
 
 def divider() -> QFrame:
