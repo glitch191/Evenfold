@@ -245,3 +245,33 @@ def test_built_in_presets_are_complete_and_explained(env):
     finally:
         session.apply_preset(before.preset_dict())
         session.results_stale = False
+
+
+def test_mouse_wheel_scrolls_the_side_column_without_changing_settings(env):
+    from PySide6.QtCore import QPoint, QPointF, Qt
+    from PySide6.QtGui import QWheelEvent
+    from PySide6.QtWidgets import QScrollArea
+
+    app, window, _root = env
+    window.set_mode("advanced", save=False)
+    panel = window.advanced.settings_panel
+    panel.set_expanded(True)
+    window.resize(1280, 700)          # short enough for the column to scroll
+    _pump(app, 0.3)
+    scroll = next(w for w in window.advanced.findChildren(QScrollArea) if w.widget().isAncestorOf(panel))
+    bar = scroll.verticalScrollBar()
+    bar.setValue(bar.maximum() // 2)
+    controls = (panel.target, panel.ceiling, panel.gap, panel.strength, panel.reference, panel.depth,
+                window.advanced.player.volume)
+    before = [c.value() if hasattr(c, "value") else c.currentIndex() for c in controls]
+    start = bar.value()
+    for control in controls:
+        centre = QPointF(control.rect().center())
+        event = QWheelEvent(centre, QPointF(control.mapToGlobal(centre.toPoint())), QPoint(0, 0), QPoint(0, -120),
+                            Qt.MouseButton.NoButton, Qt.KeyboardModifier.NoModifier, Qt.ScrollPhase.NoScrollPhase, False)
+        app.sendEvent(control, event)
+    after = [c.value() if hasattr(c, "value") else c.currentIndex() for c in controls]
+    assert after == before
+    assert bar.value() > start              # the wheel scrolled the column instead
+    panel.set_expanded(False)
+    window.set_mode("simple", save=False)

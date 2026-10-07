@@ -24,6 +24,7 @@ from .widgets import (
     TrackTable,
     TruePeakCard,
     button,
+    wheel_scrolls_past_controls,
 )
 
 MODE = "advanced"
@@ -124,6 +125,7 @@ class AdvancedView(QWidget):
         c.addWidget(settings_card)
         c.addStretch(1)
         scroll.setWidget(column)
+        wheel_scrolls_past_controls(scroll)
         self.main_split.addWidget(scroll)
         self.main_split.setStretchFactor(1, 1)
 

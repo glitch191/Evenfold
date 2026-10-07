@@ -23,6 +23,7 @@ from .widgets import (
     TrackList,
     button,
     label,
+    wheel_scrolls_past_controls,
 )
 
 MODE = "simple"
@@ -122,6 +123,7 @@ class SimpleView(QWidget):
         c.addWidget(SummaryCard(session))
         c.addStretch(1)
         scroll.setWidget(column)
+        wheel_scrolls_past_controls(scroll)
         root.addWidget(scroll)
 
         session.tracksChanged.connect(self._on_tracks)
